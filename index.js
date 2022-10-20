@@ -15,13 +15,7 @@ const VideoRoute = require("./Routes/VideoRoutes")
 
 const EventsRoute = require("./Routes/EventsRoute")
 
-const {
-    GetOne,
-    PostVideo,
-    getVideo,
-    deleteOne,
-    upload
-  }= require("./controllers/videoController")
+
 
 
 const app = express()
@@ -48,21 +42,6 @@ app.use("/api" ,VideoRoute)
 
 app.use("/api", EventsRoute)
 
-
-
-// app.get("/file", getVideo)
-
-// app.get("/file/:filename", GetOne)
-
-// app.post("/file",upload.single("video"),PostVideo)
-
-// app.delete("/file/:filename", deleteOne)
-
-
-// app.get("/", (req,res)=>{
-//     console.log('i am connected')
-//     res.send("welcome")
-// })
 
 mongoose.connect(process.env.MONOURL)
 .then( ()=>{
