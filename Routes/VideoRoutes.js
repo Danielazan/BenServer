@@ -6,7 +6,7 @@ const {
     getVideo,
     deleteOne,
     upload
-  }= require("../controllers/VideoController")
+  }= require("../Controllers/VideoController")
 const router = express.Router()
 
 router.get("/Media", getVideo)
