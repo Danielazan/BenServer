@@ -8,7 +8,7 @@ const mongoose = require('mongoose')
 
 const crypto = require('crypto') // <---- built-in nodejs package
 const path = require('path')
-const GridFsStorage = require('multer-gridfs-storage')
+const {GridFsStorage} = require('multer-gridfs-storage')
 const multer = require('multer')
 const Grid = require('gridfs-stream');
 const { info } = require("console");
