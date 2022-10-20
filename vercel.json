@@ -7,7 +7,7 @@
             "POST",
             "GET"
          ],
-       "dest": "/api/EventsController.js" 
+       "dest": "/api/index.js" 
       }
 
     ]
