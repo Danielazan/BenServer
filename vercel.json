@@ -7,7 +7,7 @@
             "POST",
             "GET"
          ],
-       "dest": "/api/index.js" 
+       "dest": "/index.js" 
       }
 
     ]
