@@ -1,15 +1,10 @@
 {
     "version": 2,
     "routes": [
-       { 
-         "src": "/Events", 
-         "methods":[
-            "POST",
-            "GET"
-         ],
-       "dest": "/index.js" 
-      }
-
-    ]
+      {
+      "src": "/api/(.*)",
+      "dest": "/index.js"
+   }
+]
  }
  
