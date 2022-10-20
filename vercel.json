@@ -3,7 +3,11 @@
     "routes": [
        { 
          "src": "/Events", 
-       "dest": "/api/EventsRoute.js" 
+         "methods":[
+            "POST",
+            "GET"
+         ],
+       "dest": "/api/EventsController.js" 
       }
 
     ]
