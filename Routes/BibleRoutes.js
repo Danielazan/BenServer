@@ -8,19 +8,19 @@ const {
     DeleteVerse,
     UpdateVerse
 } = require ("../Controllers/BibleController")
-const router = require("./NewsRoutes")
+
 
 const routers = express.Router()
 
 routers.get("/bibleVerse", GetBibleVerse)
 
 
-router.post("/bibleVerse", UploadImg.single("image"),PostBibleVerse)
+routers.post("/bibleVerse", UploadImg.single("image"),PostBibleVerse)
 
-router.get("/bibleVerse/:id", getSignleVerse)
+routers.get("/bibleVerse/:id", getSignleVerse)
 
-router.delete("/bibleVerse/:id", DeleteVerse)
+routers.delete("/bibleVerse/:id", DeleteVerse)
 
-router.patch("/bibleVerse/:id",UploadImg.single("image"), UpdateVerse)
+routers.patch("/bibleVerse/:id",UploadImg.single("image"), UpdateVerse)
 
 module.exports = routers

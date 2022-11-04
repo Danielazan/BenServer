@@ -7,9 +7,7 @@ const path = require('path')
 const  BibleModel = require ("../Models/BibleModel")
 
 const multer = require ("multer")
-// const { dirname } = require("path/posix")
-
-
+// const { dirname } = require("pat
 const storage = multer.diskStorage({
     destination:(req, file, cb)=>{
         cb(null, (path.join( __dirname + "/Images/")))
