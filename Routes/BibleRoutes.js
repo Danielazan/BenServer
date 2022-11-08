@@ -1,26 +1,27 @@
 const express = require("express")
 
 const {
-    GetBibleVerse,
-    UploadImg,
-    getSignleVerse,
-    PostBibleVerse,
-    DeleteVerse,
-    UpdateVerse
-} = require ("../Controllers/BibleController")
+    GetOne,
+    Postbible,
+    getbible,
+    deleteOne,
+    upload
+  }= require("../Controllers/BibleController")
+const router = express.Router()
+
+router.get("/bible", getbible)
+
+router.get("/bible/:filename", GetOne)
+
+router.post("/bible",upload.single("bible"),Postbible)
+
+router.delete("/bible/:filename", deleteOne)
+
+// router.post("/Media",UploadVideo.single("videos"),PostBibleVideo)
+
+// router.patch("/Media/:id",UploadVideo.single("videos"), UpdateVideo)
+
+// router.delete("/Media/:id", DeleteVideo)
 
 
-const routers = express.Router()
-
-routers.get("/bibleVerse", GetBibleVerse)
-
-
-routers.post("/bibleVerse", UploadImg.single("image"),PostBibleVerse)
-
-routers.get("/bibleVerse/:id", getSignleVerse)
-
-routers.delete("/bibleVerse/:id", DeleteVerse)
-
-routers.patch("/bibleVerse/:id",UploadImg.single("image"), UpdateVerse)
-
-module.exports = routers
+module.exports = router

@@ -1,121 +1,171 @@
-const mongoose = require("mongoose")
 
-const fs= require("fs")
+// import the packages
+const express = require("express");
 
+const dotenv = require('dotenv');
+
+const mongoose = require('mongoose')
+
+//serving and storing media
+
+const crypto = require('crypto') // <---- built-in nodejs package
 const path = require('path')
+const {GridFsStorage} = require('multer-gridfs-storage')
+const multer = require('multer')
+const Grid = require('gridfs-stream');
+const { info } = require("console");
 
-const  BibleModel = require ("../Models/BibleModel")
+// import custom functions
 
-const multer = require ("multer")
-// const { dirname } = require("pat
-const storage = multer.diskStorage({
-    destination:(req, file, cb)=>{
-        cb(null, (path.join( __dirname + "/Images/")))
-    },
-    filename:(req,file,cb)=>{
-        cb(null,file.originalname + "_" + Date.now())
-    }
-})
+// const connectDB= require('./services/db')
 
-const UploadImg = multer({
-    storage: storage,
+// import environmental variables into the application
+dotenv.config();
 
-      fileFilter(req, file, cb) {
-        if (!file.originalname.match(/\.(png|jpg)$/)) { 
-           // upload only png and jpg format
-           return cb(new Error('Please upload a Image'))
-         }
-       cb(undefined, true)
-    }
-})
+const PORT = process.env.PORT || 5000;
+
+// initialize an express instance
 
 
-// Get all BibleVerse
-const getSignleVerse = async (req, res)=>{
-    const {id}= req.params
-
-    if(!mongoose.Types.ObjectId.isValid(id)){
-        return res.status(404).json({error:"No such error"})
-    }
-
-    const verse = await BibleModel.findById(id)
-
-    if(!verse){
-        res.status(404).json({error:"No such verse exist"})
-    }
-
-    res.status(200).json(verse)
-}
-const GetBibleVerse = async (req, res)=>{
-    const Bibleverse = await BibleModel.find({}).sort({createdAt: -1})
-
-    res.status(200).json(Bibleverse)
 
 
-}
 
-//Get Single Bibleverse
 
-const PostBibleVerse= async (req,res)=>{
-    const obj ={
-        BibleVerse:req.body.BibleVerse,
-        BibleChapter:req.body.BibleChapter,
-        // desc:req.body.desc,
-        img:{
-            data: fs.readFileSync(path.join(__dirname + "/Images/" + req.file.filename)),
-            ContentType:"image/png"
+// specifiy what middlwares we are going to use
+
+
+// establish a connection wiht the database
+
+// const db = mongoose.connection;
+
+// let gfs;
+// db.once("open", function() {
+//   gfs = Grid(db.db, mongoose.mongo);
+// });
+
+
+//  connectDB()
+
+//GridFS & Multer
+const url ="mongodb+srv://Eagle:Eagle@lazan.o3kukpu.mongodb.net/Bensite?retryWrites=true&w=majority"
+
+const conn = mongoose.createConnection(url, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  useCreateIndex: true,
+});
+
+let gfs;
+conn.once("open", function() {
+  gfs = Grid(conn.db, mongoose.mongo);
+  gfs.collection('Bibleverse')
+});
+// create a stream connection with our cluster
+// const gfs =  Grid(conn.db,mongoose.mongo)
+
+//name of the bucket where media is going to be retrieved
+// gfs.collection('media')
+
+
+
+// secifying a storage location in our cluster for multer
+let infos=[
+  {"example":"Example contect"}
+]
+const storage =   new GridFsStorage({
+  url: url,
+  file: (req, file) => {
+    return new Promise((resolve, reject) => {
+      crypto.randomBytes(16, (err, buf) => {
+        if (err) {
+          return reject(err);
         }
-    }
+        const filename =
+          buf.toString('hex') + path.extname(file.originalname);
+        const fileInfo = {
+          filename,
+          bucketName: 'Bibleverse',
+          metadata:{
+            name:req.body.name,
+            desc:req.body.desc
+          }
+        };
+        return resolve(fileInfo);
+      });
+    });
+  }
+});
 
-    try{
-        const Bibleverse= await BibleModel.create(obj)
-        res.status(200).json(Bibleverse)
-    }
+// inializing our multer storage
+const upload = multer({ storage });
 
-    catch(err){
-        if(err){
-            res.status(400).json({err:err.message})
-        }
-    }
+const Postbible= (req,res)=>{
+  const file=req.file
+
+  const Info=req.body
+
+  infos.pop(Info)
+
+  infos.push(Info)
+  const obj={
+    file,
+    infos
+  }
+
+ res.json(obj)
 }
 
-const DeleteVerse = async (req, res)=>{
-    const {id}= req.params
+// route for fetching all the files from the media bucket
 
-    if(!mongoose.Types.ObjectId.isValid(id)){
-        return res.status(404).json({error:"no such Verse exits"})
-    }
+const getbible=async(req,res)=>{
+try{
+  const files =await gfs.files.find().toArray()
 
-    const verse = await BibleModel.findOneAndDelete({_id:id})
+  res.json(files)
 
-    if(!verse){
-        res.status(400).json({error:"No such Verse exist"})
-    }
+}catch(err){
+  res.status(400).send(err)
+}
+ 
+  
+}
+// route for streaming a file
+const GetOne=async(req,res)=>{
 
-    res.status(200).json(verse)
+  const{filename}= req.params
+  try{
+    const readstream = await gfs.createReadStream({filename})
+
+    readstream.pipe(res)
+  }catch(err){
+    res.status(400).send(err)
+  }
+
+}
+// route for deleting a file
+const deleteOne=async(req,res)=>{
+  const{filename}=req.params
+  try{
+  
+  await gfs.files.remove({filename})
+   
+    res.status(200).end()
+  }catch(err){
+    res.status(400).send(err)
+  }
 }
 
-const UpdateVerse = async (req, res)=>{
-    const {id}= req.params
 
-    if(!mongoose.Types.ObjectId.isValid(id)){
-       return res.status(404).json({error:"No such Verse exist"})
-    }
 
-    const verse = await BibleModel.findOneAndUpdate({_id:id},{...req.body})
 
-    if(!verse){
-       res.status(404).json({error:"No such verse exist"})
-    }
 
-    res.status(200).json(verse)
+module.exports={
+    GetOne,
+    Postbible,
+    getbible,
+    deleteOne,
+    upload
 }
 
-module.exports = {
-    GetBibleVerse,
-    getSignleVerse,
-    UploadImg,
-    PostBibleVerse,
-    DeleteVerse,
-    UpdateVerse
-}
+
+
